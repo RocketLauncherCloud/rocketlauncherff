@@ -1,28 +1,18 @@
 package main
 
 import (
+	"github.com/RocketLauncherFF/rocketlauncherff/core"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
-	"time"
-
-	"github.com/gin-gonic/gin"
 )
-
-type FeatureFlag struct {
-	Id          string
-	Name        string
-	Description string
-	Enabled     bool
-	created     time.Time
-	updated     time.Time
-}
 
 func main() {
 	router := gin.Default()
 	datastore, err := NewDataStore(os.Getenv("DATASTORE_URL"))
 
 	router.POST("/v1/flags", func(c *gin.Context) {
-		var json FeatureFlag
+		var json core.FeatureFlag
 		if err := c.ShouldBindJSON(&json); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -45,7 +35,7 @@ func main() {
 	})
 
 	router.PUT("/v1/flags/", func(c *gin.Context) {
-		var json FeatureFlag
+		var json core.FeatureFlag
 		if err := c.ShouldBindJSON(&json); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
