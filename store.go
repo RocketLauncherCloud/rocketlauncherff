@@ -2,15 +2,17 @@ package main
 
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
 	"time"
+
+	"github.com/RocketLauncherFF/rocketlauncherff/core"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type DataStore interface {
-	Find(string) (*FeatureFlag, error)
-	Save(*FeatureFlag) (*FeatureFlag, error)
-	Update(*FeatureFlag) (*FeatureFlag, error)
-	FindAll() ([]FeatureFlag, error)
+	Find(string) (*core.FeatureFlag, error)
+	Save(*core.FeatureFlag) (*core.FeatureFlag, error)
+	Update(*core.FeatureFlag) (*core.FeatureFlag, error)
+	FindAll() ([]core.FeatureFlag, error)
 	Delete(string) error
 }
 
@@ -47,8 +49,8 @@ func NewDataStore(dbUrl string) (*MySQLDataStore, error) {
 	return &MySQLDataStore{db: db}, nil
 }
 
-func (datastore MySQLDataStore) Find(name string) (*FeatureFlag, error) {
-	ff := FeatureFlag{}
+func (datastore MySQLDataStore) Find(name string) (*core.FeatureFlag, error) {
+	ff := core.FeatureFlag{}
 	err := datastore.db.QueryRow(selectQuery, name).Scan(&ff.Name, &ff.Description, &ff.Enabled, &ff.Id)
 	if err != nil {
 		return nil, err
@@ -56,7 +58,7 @@ func (datastore MySQLDataStore) Find(name string) (*FeatureFlag, error) {
 	return &ff, nil
 }
 
-func (datastore MySQLDataStore) Save(ff *FeatureFlag) (*FeatureFlag, error) {
+func (datastore MySQLDataStore) Save(ff *core.FeatureFlag) (*core.FeatureFlag, error) {
 	_, err := datastore.db.Exec(insertQuery, ff.Name, ff.Description, time.Now(), time.Now())
 	if err != nil {
 		return nil, err
@@ -64,7 +66,7 @@ func (datastore MySQLDataStore) Save(ff *FeatureFlag) (*FeatureFlag, error) {
 	return ff, nil
 }
 
-func (datastore MySQLDataStore) Update(ff *FeatureFlag) (*FeatureFlag, error) {
+func (datastore MySQLDataStore) Update(ff *core.FeatureFlag) (*core.FeatureFlag, error) {
 	_, err := datastore.db.Exec(updateQuery, ff.Name, ff.Description, ff.Enabled, time.Now(), ff.Id)
 	if err != nil {
 		return nil, err
@@ -80,15 +82,15 @@ func (datastore MySQLDataStore) Delete(id string) error {
 	return nil
 }
 
-func (datastore MySQLDataStore) FindAll() ([]FeatureFlag, error) {
-	var flags []FeatureFlag
+func (datastore MySQLDataStore) FindAll() ([]core.FeatureFlag, error) {
+	var flags []core.FeatureFlag
 	rows, err := datastore.db.Query(selectAllQuery)
 	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
-		var ff FeatureFlag
+		var ff core.FeatureFlag
 		err := rows.Scan(&ff.Name, &ff.Description, &ff.Enabled, &ff.Id)
 		if err != nil {
 			return nil, err
